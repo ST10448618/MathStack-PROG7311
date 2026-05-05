@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "MA9tnVK+zCg=",
+  "dgSpecHash": "1AETOF4rFbE=",
   "success": true,
-  "projectFilePath": "C:\\Users\\perez\\VSCodeProjects\\MathAPIClient\\MathAPIClient.csproj",
+  "projectFilePath": "C:\\Users\\perez\\VSCodeProjects\\MathStack\\MathAPIClient\\MathAPIClient.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\perez\\.nuget\\packages\\firebase.auth\\1.0.0\\firebase.auth.1.0.0.nupkg.sha512",
     "C:\\Users\\perez\\.nuget\\packages\\microsoft.csharp\\4.0.1\\microsoft.csharp.4.0.1.nupkg.sha512",

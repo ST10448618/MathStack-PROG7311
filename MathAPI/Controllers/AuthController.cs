@@ -16,13 +16,19 @@ namespace MathAPI.Controllers
     public class AuthController : Controller
     {
         
-        FirebaseAuthProvider auth;
-        byte[] key;
+ private readonly IConfiguration _configuration;
+        private readonly FirebaseAuthProvider _auth;
+        private readonly byte[] _key;
 
-        public AuthController()
+        public AuthController(IConfiguration configuration)
         {
-            auth = new FirebaseAuthProvider(new FirebaseConfig(Environment.GetEnvironmentVariable("FirebaseMathApp")));
-            key = Encoding.ASCII.GetBytes(Environment.GetEnvironmentVariable("MathAppJwtKey"));
+            _configuration = configuration;
+
+            var firebaseApiKey = _configuration["FirebaseMathApp"];
+            var jwtKey = _configuration["MathAppJwtKey"];
+
+            _auth = new FirebaseAuthProvider(new FirebaseConfig(firebaseApiKey));
+            _key = Encoding.ASCII.GetBytes(jwtKey);
         }
 
         [HttpPost("Register")]
@@ -30,9 +36,9 @@ namespace MathAPI.Controllers
         {
             try
             {
-                await auth.CreateUserWithEmailAndPasswordAsync(login.Email, login.Password);
+                await _auth.CreateUserWithEmailAndPasswordAsync(login.Email, login.Password);
 
-                var fbAuthLink = await auth.SignInWithEmailAndPasswordAsync(login.Email, login.Password);
+                var fbAuthLink = await _auth.SignInWithEmailAndPasswordAsync(login.Email, login.Password);
                 string currentUserId = fbAuthLink.User.LocalId;
                 string currentUserEmail = fbAuthLink.User.Email;
 
@@ -51,7 +57,7 @@ namespace MathAPI.Controllers
                     {
                         Subject = new ClaimsIdentity(claims),
                         Expires = DateTime.UtcNow.AddDays(1),
-                        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(_key), SecurityAlgorithms.HmacSha256Signature)
                     };
 
                     var token = tokenHandler.CreateToken(tokenDescriptor);
@@ -78,7 +84,7 @@ namespace MathAPI.Controllers
         {
             try
             {
-                var fbAuthLink = await auth.SignInWithEmailAndPasswordAsync(login.Email, login.Password);
+                var fbAuthLink = await _auth.SignInWithEmailAndPasswordAsync(login.Email, login.Password);
                 string currentUserId = fbAuthLink.User.LocalId;
                 string currentUserEmail = fbAuthLink.User.Email;
 
@@ -97,7 +103,7 @@ namespace MathAPI.Controllers
                     {
                         Subject = new ClaimsIdentity(claims),
                         Expires = DateTime.UtcNow.AddDays(1),
-                        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(_key), SecurityAlgorithms.HmacSha256Signature)
                     };
 
                     var token = tokenHandler.CreateToken(tokenDescriptor);

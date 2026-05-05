@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\perez\\VSCodeProjects\\MathAPIClient\\MathAPIClient.csproj": {}
+    "C:\\Users\\perez\\VSCodeProjects\\MathStack\\MathAPIClient\\MathAPIClient.csproj": {}
   },
   "projects": {
-    "C:\\Users\\perez\\VSCodeProjects\\MathAPIClient\\MathAPIClient.csproj": {
+    "C:\\Users\\perez\\VSCodeProjects\\MathStack\\MathAPIClient\\MathAPIClient.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\perez\\VSCodeProjects\\MathAPIClient\\MathAPIClient.csproj",
+        "projectUniqueName": "C:\\Users\\perez\\VSCodeProjects\\MathStack\\MathAPIClient\\MathAPIClient.csproj",
         "projectName": "MathAPIClient",
-        "projectPath": "C:\\Users\\perez\\VSCodeProjects\\MathAPIClient\\MathAPIClient.csproj",
+        "projectPath": "C:\\Users\\perez\\VSCodeProjects\\MathStack\\MathAPIClient\\MathAPIClient.csproj",
         "packagesPath": "C:\\Users\\perez\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\perez\\VSCodeProjects\\MathAPIClient\\obj\\",
+        "outputPath": "C:\\Users\\perez\\VSCodeProjects\\MathStack\\MathAPIClient\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
