@@ -4,8 +4,6 @@ services:
     container_name: math-db
     environment:
       ACCEPT_EULA: "Y"
-      MSSQL_PID: "Express"
-      SA_PASSWORD: "${SA_PASSWORD}"
       MSSQL_SA_PASSWORD: "${SA_PASSWORD}"
     ports:
       - "1433:1433"
