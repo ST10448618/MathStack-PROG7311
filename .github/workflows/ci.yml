@@ -91,7 +91,6 @@ jobs:
       - name: Show running containers
         run: docker ps
 
-      # ✅ FIXED DATABASE CHECK (IMPORTANT CHANGE)
       - name: Wait for database
         run: |
           echo "Waiting for SQL Server..."
