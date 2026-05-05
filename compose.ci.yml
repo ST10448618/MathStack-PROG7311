@@ -1,12 +1,13 @@
 services:
-  math-db:
-    image: ghcr.io/${GITHUB_OWNER_LC}/mathstack-db:${IMAGE_TAG}
-    container_name: math-db
-    environment:
-      ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "${SA_PASSWORD}"
-    ports:
-      - "1433:1433"
+ math-db:
+  image: ghcr.io/${GITHUB_OWNER_LC}/mathstack-db:${IMAGE_TAG}
+  container_name: math-db
+  environment:
+    ACCEPT_EULA: "Y"
+    MSSQL_PID: "Express"
+    MSSQL_SA_PASSWORD: "${SA_PASSWORD}"
+  ports:
+    - "1433:1433"
 
   math-api:
     image: ghcr.io/${GITHUB_OWNER_LC}/mathstack-api:${IMAGE_TAG}
