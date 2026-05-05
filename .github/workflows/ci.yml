@@ -1,0 +1,148 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    outputs:
+      owner_lc: ${{ steps.vars.outputs.owner_lc }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Lowercase owner
+        id: vars
+        run: echo "owner_lc=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push DB
+        uses: docker/build-push-action@v6
+        with:
+          context: ./db
+          file: ./db/Dockerfile
+          push: true
+          tags: ghcr.io/${{ steps.vars.outputs.owner_lc }}/mathstack-db:latest
+
+      - name: Build and push API
+        uses: docker/build-push-action@v6
+        with:
+          context: ./MathAPI
+          file: ./MathAPI/Dockerfile
+          push: true
+          tags: ghcr.io/${{ steps.vars.outputs.owner_lc }}/mathstack-api:latest
+
+      - name: Build and push Client
+        uses: docker/build-push-action@v6
+        with:
+          context: ./MathAPIClient
+          file: ./MathAPIClient/Dockerfile
+          push: true
+          tags: ghcr.io/${{ steps.vars.outputs.owner_lc }}/mathstack-client:latest
+
+  run-stack:
+    runs-on: ubuntu-latest
+    needs: publish
+    permissions:
+      contents: read
+      packages: read
+
+    env:
+      IMAGE_TAG: latest
+      GITHUB_OWNER_LC: ${{ needs.publish.outputs.owner_lc }}
+      SA_PASSWORD: ${{ secrets.SA_PASSWORD }}
+      FirebaseMathApp: ${{ secrets.FirebaseMathApp }}
+      MathAppJwtKey: ${{ secrets.MathAppJwtKey }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull images
+        run: docker compose -f compose.ci.yml pull
+
+      - name: Start stack
+        run: docker compose -f compose.ci.yml up -d
+
+      - name: Show running containers
+        run: docker ps
+
+      - name: Wait for database
+        run: |
+          for i in {1..36}; do
+            if docker exec math-db /bin/bash -c "sqlcmd -S localhost -U sa -P '$SA_PASSWORD' -C -Q 'SELECT 1'" >/dev/null 2>&1; then
+              echo "Database is ready"
+              exit 0
+            fi
+            echo "Waiting for database..."
+            sleep 5
+          done
+          echo "Database did not become ready"
+          docker logs math-db || true
+          exit 1
+
+      - name: Wait for API
+        run: |
+          for i in {1..36}; do
+            if curl -fsS http://localhost:8081/api/health >/dev/null 2>&1; then
+              echo "API is ready"
+              exit 0
+            fi
+            echo "Waiting for API..."
+            sleep 5
+          done
+          echo "API did not respond"
+          docker logs math-api || true
+          exit 1
+
+      - name: Wait for client
+        run: |
+          for i in {1..36}; do
+            if curl -fsS http://localhost:8082/health >/dev/null 2>&1; then
+              echo "Client is ready"
+              exit 0
+            fi
+            echo "Waiting for client..."
+            sleep 5
+          done
+          echo "Client did not respond"
+          docker logs math-client || true
+          exit 1
+
+      - name: Show logs if failure
+        if: failure()
+        run: |
+          echo "===== DB LOGS ====="
+          docker logs math-db || true
+          echo "===== API LOGS ====="
+          docker logs math-api || true
+          echo "===== CLIENT LOGS ====="
+          docker logs math-client || true
+
+      - name: Stop stack
+        if: always()
+        run: docker compose -f compose.ci.yml down -v
